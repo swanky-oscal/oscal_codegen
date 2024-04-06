@@ -1,0 +1,16 @@
+[package]
+name = "oscal_codegen"
+version = "0.1.0"
+edition = "2021"
+description = "Generate Rust oscal_lib from FedRAMP JSON schema"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.81"
+clap = { version = "4.5.3", features = ["derive"] }
+convert_case = "0.6.0"
+indexmap = { version = "2.2.6", features = ["serde"] }
+oscal_types = { git = "https://github.com/dskyberg/oscal_types.git" }
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = { version = "1.0.114", features = ["preserve_order"] }
+thiserror = "1.0.58"
