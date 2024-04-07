@@ -3,7 +3,7 @@ use indexmap::IndexMap;
 use serde::Serialize;
 use serde_json::{Map, Value};
 
-use crate::{try_string_entry, Property, StringType};
+use crate::{try_string_entry, AnyOf, Property, StringType};
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct SchemaObject {
@@ -30,8 +30,16 @@ impl SchemaObject {
             .ok()
             .map(|s| s.to_owned());
         let _type = try_string_entry("type", map).ok().map(|s| s.to_owned());
-        let type_ref = try_string_entry("$ref", map).ok().map(|s| s.to_owned());
+        let mut type_ref = try_string_entry("$ref", map).ok().map(|s| s.to_owned());
         let string_type = StringType::parse(map)?;
+
+        if _type.is_none() && type_ref.is_none() && map.contains_key("anyOf") {
+            if let Some(value) = map.get("anyOf") {
+                let any_of = AnyOf::try_from(value)?;
+                type_ref = Some(any_of.ref_name.clone());
+            }
+        }
+
         Ok(Self {
             ns: ns.to_owned(),
             name: name.to_owned(),

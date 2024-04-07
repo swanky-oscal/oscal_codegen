@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 use anyhow::Result;
 use indexmap::{map::Iter, IndexMap};
-use serde::Serialize;
 
 use crate::{SchemaObject, TreeEntry};
 
@@ -15,29 +14,36 @@ pub enum Error {
     NotTree(String),
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
-#[serde(transparent)]
-pub struct SchemaTree(IndexMap<String, TreeEntry>);
+pub struct Schema {
+    pub schema: String,
+    pub version: String,
+    pub comment: String,
+    tree: IndexMap<String, TreeEntry>,
+}
 
-impl SchemaTree {
-    pub fn new() -> Self {
-        Self(IndexMap::new())
+impl Schema {
+    pub fn new(schema: &str, version: &str, comment: &str) -> Self {
+        Self {
+            schema: schema.to_owned(),
+            version: version.to_owned(),
+            comment: comment.to_owned(),
+            tree: IndexMap::new(),
+        }
     }
-
     pub fn iter(&self) -> Iter<'_, String, TreeEntry> {
-        self.0.iter()
+        self.tree.iter()
     }
 
     pub fn keys(&self) -> indexmap::map::Keys<'_, String, TreeEntry> {
-        self.0.keys()
+        self.tree.keys()
     }
     /// The schema only has a single TreeEntry object
     pub fn is_reducable(&self, name: &str) -> bool {
-        if self.0.len() != 1 {
+        if self.tree.len() != 1 {
             return false;
         }
 
-        let Some((key, value)) = self.0.get_index(0) else {
+        let Some((key, value)) = self.tree.get_index(0) else {
             return false;
         };
 
@@ -49,23 +55,23 @@ impl SchemaTree {
     }
 
     pub fn has(&self, key: &str) -> bool {
-        self.0.contains_key(key)
+        self.tree.contains_key(key)
     }
 
     pub fn get(&self, name: &str) -> Result<&TreeEntry> {
-        self.0
+        self.tree
             .get(name)
             .ok_or(Error::EntryNotFound(name.to_owned()).into())
     }
 
     pub fn get_mut(&mut self, name: &str) -> Result<&mut TreeEntry> {
-        self.0
+        self.tree
             .get_mut(name)
             .ok_or(Error::EntryNotFound(name.to_owned()).into())
     }
 
     pub fn add_object(&mut self, name: &str, obj: &SchemaObject) -> Result<()> {
-        self.0
+        self.tree
             .insert(name.to_owned(), TreeEntry::Object(Box::new(obj.to_owned())));
         Ok(())
     }
@@ -75,19 +81,20 @@ impl SchemaTree {
     }
 
     pub fn add_tree(&mut self, name: &str) -> Result<()> {
-        self.0.insert(name.to_owned(), TreeEntry::Tree(Self::new()));
+        self.tree
+            .insert(name.to_owned(), TreeEntry::Tree(Self::new("", "", "")));
 
         Ok(())
     }
-    pub fn get_tree(&self, name: &str) -> Result<&SchemaTree> {
+    pub fn get_tree(&self, name: &str) -> Result<&Self> {
         self.get(name)?.as_tree()
     }
 
-    pub fn get_tree_mut(&mut self, name: &str) -> Result<&mut SchemaTree> {
+    pub fn get_tree_mut(&mut self, name: &str) -> Result<&mut Self> {
         self.get_mut(name)?.as_tree_mut()
     }
 
-    pub fn get_or_add_tree(&mut self, name: &str) -> Result<&mut SchemaTree> {
+    pub fn get_or_add_tree(&mut self, name: &str) -> Result<&mut Self> {
         if self.has(name) {
             return self.get_tree_mut(name);
         }

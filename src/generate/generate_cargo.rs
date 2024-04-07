@@ -27,7 +27,7 @@ pub fn generate_cargo(path: PathBuf) -> Result<()> {
     writeln!(buffer, r#"[dependencies]"#)?;
     writeln!(
         buffer,
-        r#"oscal_types = {{ git = "https://github.com/dskyberg/oscal_types.git" }}"#
+        r#"oscal_types = {{ git = "https://github.com/swanky-oscal/oscal_types.git" }}"#
     )?;
     writeln!(
         buffer,

@@ -3,14 +3,14 @@ use convert_case::Casing;
 use indexmap::IndexMap;
 use serde_json::{Map, Value};
 
-use crate::{util::*, Property, Resolver, SchemaObject, SchemaTree, SchemaType, TypeRef};
+use crate::{util::*, Property, Resolver, Schema, SchemaObject, SchemaType, TypeRef};
 
 use super::{get_any_of, get_required, parse_array, parse_object};
 
 pub fn parse_props(
     obj_map: &Map<String, Value>,
     parent_obj: &mut SchemaObject,
-    parent_tree: &mut SchemaTree,
+    parent_tree: &mut Schema,
     resolver: &mut Resolver,
 ) -> Result<()> {
     let Ok(props_value) = try_map_entry("properties", obj_map) else {
@@ -85,6 +85,9 @@ pub fn parse_props(
             let items = try_map_entry("items", prop_map)?;
             let (t_opt, any_opt) =
                 parse_array(&entry_name, items, parent_obj, parent_tree, resolver)?;
+            if t_opt.is_none() && any_opt.is_none() {
+                println!("Weird: {}, {:?}", &prop_name, &parent_obj.name);
+            }
             if let Some(type_ref) = t_opt {
                 let prop = Property {
                     optional: !required,

@@ -80,9 +80,7 @@ impl Namespace {
     }
 
     pub fn use_types(&self) -> Option<String> {
-        let Some(types_ns) = self.subs.get("oscal_types") else {
-            return None;
-        };
+        let types_ns = self.subs.get("oscal_types")?;
         let entries = types_ns.entries.join(", ");
         match types_ns.entries.len() {
             1 => Some(entries),

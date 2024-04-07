@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde_json::{Map, Value};
 
-use crate::{Resolver, SchemaObject, SchemaTree, SchemaType};
+use crate::{Resolver, Schema, SchemaObject, SchemaType};
 
 use super::parse_props;
 
@@ -10,10 +10,11 @@ pub fn parse_object(
     ns: &str,
     name: &str,
     map: &Map<String, Value>,
-    tree: &mut SchemaTree,
+    tree: &mut Schema,
     resolver: &mut Resolver,
 ) -> Result<()> {
     let mut obj = SchemaObject::parse(ns, name, map)?;
+
     if let Some(id) = &obj.id {
         // This object has an ID.  Add it to the resolver
         let schema_type = SchemaType::from(&obj);

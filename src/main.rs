@@ -11,8 +11,8 @@ use generate::*;
 use parse::*;
 use property::*;
 use resolver::*;
+use schema::*;
 use schema_object::*;
-use schema_tree::*;
 use schema_type::*;
 use string_type::*;
 use tree_entry::*;
@@ -26,8 +26,8 @@ mod generate;
 mod parse;
 mod property;
 mod resolver;
+mod schema;
 mod schema_object;
-mod schema_tree;
 mod schema_type;
 mod string_type;
 mod tree_entry;
@@ -37,9 +37,6 @@ mod util;
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
-    /// Just display the schema
-    #[arg(short, long)]
-    display: bool,
     /// The input schema file
     #[arg(short, long, value_name = "FILE")]
     schema: PathBuf,
@@ -65,17 +62,12 @@ fn main() -> Result<()> {
 
     let mut resolver = Resolver::new();
     let json_path = cli.schema;
-    let schema = fs::read_to_string(json_path)?;
-    let json = serde_json::from_str::<Value>(&schema)?;
+    let schema_file = fs::read_to_string(json_path)?;
+    let json = serde_json::from_str::<Value>(&schema_file)?;
 
-    let tree = parse_schema(&json, &mut resolver)?;
+    let schema = parse_schema(&json, &mut resolver)?;
 
-    if cli.display {
-        let json = serde_json::to_string_pretty(&tree)?;
-        println!("{json}");
-    } else {
-        generate(cli.output, cli.input, &tree, &resolver)?;
-    }
+    generate(cli.output, cli.input, &schema, &resolver)?;
 
     Ok(())
 }

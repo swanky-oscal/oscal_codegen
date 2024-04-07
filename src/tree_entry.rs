@@ -1,8 +1,7 @@
 #![allow(dead_code)]
 use anyhow::Result;
-use serde::Serialize;
 
-use crate::{SchemaObject, SchemaTree};
+use crate::{Schema, SchemaObject};
 
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 enum Error {
@@ -11,10 +10,9 @@ enum Error {
     #[error("Not a tree")]
     NotTree,
 }
-#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum TreeEntry {
     Object(Box<SchemaObject>),
-    Tree(SchemaTree),
+    Tree(Schema),
 }
 
 impl TreeEntry {
@@ -32,13 +30,13 @@ impl TreeEntry {
         }
     }
 
-    pub fn as_tree(&self) -> Result<&SchemaTree> {
+    pub fn as_tree(&self) -> Result<&Schema> {
         match self {
             TreeEntry::Tree(tree) => Ok(tree),
             _ => Err(Error::NotTree.into()),
         }
     }
-    pub fn as_tree_mut(&mut self) -> Result<&mut SchemaTree> {
+    pub fn as_tree_mut(&mut self) -> Result<&mut Schema> {
         match self {
             TreeEntry::Tree(tree) => Ok(tree),
             _ => Err(Error::NotTree.into()),

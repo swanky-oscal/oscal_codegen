@@ -52,7 +52,7 @@ pub(super) fn generate_struct(
 
     let mut namespace = Namespace::new("");
 
-    add_type_ref(&obj.type_ref, resolver, &mut namespace)?;
+    add_type_ref(&obj, resolver, &mut namespace)?;
 
     let props_string = generate_props(&obj.props, resolver, &mut namespace)?;
 
@@ -119,8 +119,10 @@ pub(super) fn generate_struct(
         buffer,
         "#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]"
     )?;
-    if obj.type_ref.is_some() {
-        format_tuple_struct(&mut buffer, &obj.name, &obj.type_ref, resolver)?;
+    if obj._type == Some("string".to_owned()) {
+        format_string_struct(&mut buffer, &obj.name)?;
+    } else if obj.type_ref.is_some() {
+        format_ref_struct(&mut buffer, &obj.name, &obj.type_ref, resolver)?;
     } else {
         format_prop_struct(&mut buffer, &obj.name, props_string)?;
     }
@@ -140,16 +142,20 @@ fn has_options(obj: &SchemaObject) -> bool {
     false
 }
 
-fn add_type_ref(
-    _ref: &Option<String>,
-    resolver: &Resolver,
-    namespace: &mut Namespace,
-) -> Result<()> {
-    if _ref.is_none() {
+fn add_type_ref(obj: &SchemaObject, resolver: &Resolver, namespace: &mut Namespace) -> Result<()> {
+    if obj._type == Some("string".to_string()) {
+        namespace.add_type(&SchemaType {
+            ns: "error".to_string(),
+            name: "Error".to_string(),
+        })?;
         return Ok(());
     }
 
-    let Some(schema_type) = resolver.resolve(&TypeRef::from_ref(_ref.to_owned())) else {
+    if obj.type_ref.is_none() {
+        return Ok(());
+    }
+
+    let Some(schema_type) = resolver.resolve(&TypeRef::from_ref(obj.type_ref.clone())) else {
         return Err(Error::ResolverFailure.into());
     };
 
@@ -164,7 +170,38 @@ fn add_type_ref(
     Ok(())
 }
 
-fn format_tuple_struct(
+fn format_string_struct(buffer: &mut File, name: &str) -> Result<()> {
+    writeln!(buffer, "pub struct {}(String);", name)?;
+
+    writeln!(buffer)?;
+    // Deref
+    writeln!(
+        buffer,
+        r##"impl std::ops::Deref for {name} {{
+    type Target = str;
+    fn deref(&self) -> &Self::Target {{
+            &self.0
+    }}
+}}"##
+    )?;
+
+    // TryFrom
+    writeln!(
+        buffer,
+        r##"
+impl TryFrom<&str> for {name} {{
+    type Error = Error;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {{
+        Ok(Self(value.to_string()))
+    }}
+}}
+"##
+    )?;
+
+    Ok(())
+}
+
+fn format_ref_struct(
     buffer: &mut File,
     name: &str,
     _ref: &Option<String>,

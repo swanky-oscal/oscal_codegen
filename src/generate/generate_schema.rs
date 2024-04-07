@@ -3,11 +3,11 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 
-use crate::{Resolver, SchemaTree, TreeEntry};
+use crate::{Resolver, Schema, TreeEntry};
 
 use super::{generate_mod, generate_struct};
 
-pub fn generate_schema(path: &PathBuf, tree: &SchemaTree, resolver: &Resolver) -> Result<()> {
+pub fn generate_schema(path: &PathBuf, tree: &Schema, resolver: &Resolver) -> Result<()> {
     let mut mods: Vec<&str> = vec![];
     let mut mods_done = false;
 

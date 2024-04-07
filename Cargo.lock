@@ -449,6 +449,7 @@ dependencies = [
  "convert_case",
  "indexmap 2.2.6",
  "oscal_types",
+ "regex",
  "serde",
  "serde_json",
  "thiserror",
@@ -457,7 +458,6 @@ dependencies = [
 [[package]]
 name = "oscal_types"
 version = "0.0.1"
-source = "git+https://github.com/dskyberg/oscal_types.git#b95329f0008fb6cee4bcf0d9ef529887c1fbbf77"
 dependencies = [
  "chrono",
  "fluent-uri",

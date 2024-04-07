@@ -10,7 +10,7 @@ pub struct SchemaType {
 impl SchemaType {
     pub fn new(ns: &str, name: &str) -> Self {
         if name.contains('_') {
-            eprintln!("SchemaType name should not contain underscores");
+            eprintln!("SchemaType name should not contain underscores: {}", name);
         }
         Self {
             ns: ns.to_owned(),

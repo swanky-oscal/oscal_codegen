@@ -27,4 +27,6 @@ pub enum Error {
     ResolverFailure,
     #[error("Namespace was incomplete: {0} - {1}")]
     IncompleteNamespace(String, String),
+    #[error("Failed to parse version from schema $id")]
+    VersionParse,
 }

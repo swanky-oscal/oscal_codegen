@@ -1,0 +1,48 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'oscal_codegen'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=oscal_codegen",
+                    "--package=oscal_codegen"
+                ],
+                "filter": {
+                    "name": "oscal_codegen",
+                    "kind": "bin"
+                }
+            },
+            "args": [
+                "-s",
+                "../oscal/schema/v1.1.2/oscal_complete_schema.json"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'oscal_codegen'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=oscal_codegen",
+                    "--package=oscal_codegen"
+                ],
+                "filter": {
+                    "name": "oscal_codegen",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

@@ -63,7 +63,7 @@ impl From<&str> for NamespaceEntry {
         NamespaceEntry {
             left: "".to_string(),
             right: name.to_case(Case::Snake),
-            rust: name.to_owned(),
+            rust: name.to_case(Case::Pascal),
         }
     }
 }
